@@ -1,0 +1,153 @@
+{
+  "name": "ChatSession",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "sessions": {
+      "type": "array",
+      "description": "Array of agent sessions with full conversation history",
+      "items": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "agent_name": {
+            "type": "string"
+          },
+          "agent_img": {
+            "type": "string"
+          },
+          "agent_role": {
+            "type": "string"
+          },
+          "agent_gender": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed"
+            ],
+            "default": "active"
+          },
+          "started_at": {
+            "type": "string"
+          },
+          "ended_at": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "number"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "image_url": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "sent_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "active_session_id": {
+      "type": "string",
+      "description": "Current active session ID"
+    },
+    "chat_mode": {
+      "type": "string",
+      "enum": [
+        "ai",
+        "manual",
+        "hybrid"
+      ],
+      "default": "ai"
+    },
+    "admin_takeover": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_message_preview": {
+      "type": "string"
+    },
+    "last_message_date": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

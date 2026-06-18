@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0b3d2e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Money Tracker" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Deep Linking Support for iOS (Universal Links) -->
+    <link rel="apple-app-site-association" href="/.well-known/apple-app-site-association" />
+    <!-- Deep Linking Support for Android (App Links) -->
+    <link rel="assetlinks" href="/.well-known/assetlinks.json" />
+    
+    <!-- Deep Link Meta Tags -->
+    <meta name="apple-itunes-app" content="app-id=YOUR_APP_ID, affiliate-data=app=moneytracker" />
+    <meta property="og:url" content="https://money-tracker.app/" />
+    <meta property="og:title" content="Money Tracker" />
+    <meta property="og:description" content="Modern Digital Banking & Money Transfer App" />
+    <meta property="og:image" content="https://media.base44.com/images/public/69fdabac102db66d741fa29f/logo.png" />
+    
+    <title>Money Tracker</title>
+    <script>
+      if ('serviceWorker' in navigator) {
+        // Force unregister stale SW on every load, then re-register fresh
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          registrations.forEach(function(reg) { reg.unregister(); });
+        });
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

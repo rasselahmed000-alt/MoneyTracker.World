@@ -1,0 +1,31 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAM_ID.com.moneytracker.app",
+        "paths": [
+          "/",
+          "/add-money",
+          "/deposit-options/*",
+          "/pay-redirect*",
+          "/mobile-banking-transfer*",
+          "/bank-transfer",
+          "/intl-transfer",
+          "/air-ticket",
+          "/visa",
+          "/support",
+          "/group-chat",
+          "/history",
+          "/profile",
+          "/wallet",
+          "/exchange-rates",
+          "/kyc"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["TEAM_ID.com.moneytracker.app"]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "name": "Money Tracker",
+  "short_name": "Money Tracker",
+  "description": "Modern Digital Banking & Money Transfer App",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0b3d2e",
+  "background_color": "#ffffff",
+  "screenshots": [
+    {
+      "src": "https://media.base44.com/images/public/69fdabac102db66d741fa29f/screenshot1.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://base44.com/logo_v2.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["finance"],
+  "shortcuts": [
+    {
+      "name": "Add Money",
+      "short_name": "Add Money",
+      "description": "Add money to your account",
+      "url": "/add-money",
+      "icons": []
+    },
+    {
+      "name": "Transfer Money",
+      "short_name": "Transfer",
+      "description": "Send money via bank or mobile banking",
+      "url": "/bank-transfer",
+      "icons": []
+    },
+    {
+      "name": "View History",
+      "short_name": "History",
+      "description": "View transaction history",
+      "url": "/history",
+      "icons": []
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

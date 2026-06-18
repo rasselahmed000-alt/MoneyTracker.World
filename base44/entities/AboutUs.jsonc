@@ -1,0 +1,78 @@
+{
+  "name": "AboutUs",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Section title"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Section subtitle"
+    },
+    "description": {
+      "type": "string",
+      "description": "Main description / body text"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Section image URL"
+    },
+    "section_type": {
+      "type": "string",
+      "enum": [
+        "hero",
+        "mission",
+        "feature",
+        "stats",
+        "contact",
+        "custom"
+      ],
+      "default": "custom",
+      "description": "Type of section for display order"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji or icon code for this section"
+    },
+    "is_published": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show on customer app"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.is_published": true
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

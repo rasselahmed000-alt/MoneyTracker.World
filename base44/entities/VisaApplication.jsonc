@@ -1,0 +1,220 @@
+{
+  "name": "VisaApplication",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Applicant user ID"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Applicant email"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Applicant full name"
+    },
+    "passport_number": {
+      "type": "string",
+      "description": "Passport number"
+    },
+    "passport_scan_url": {
+      "type": "string",
+      "description": "URL to uploaded passport scan"
+    },
+    "destination_country": {
+      "type": "string",
+      "description": "Target country (emoji + name)"
+    },
+    "visa_type": {
+      "type": "string",
+      "enum": [
+        "Tourist",
+        "Business",
+        "Student",
+        "Work"
+      ],
+      "description": "Type of visa requested"
+    },
+    "purpose_of_visit": {
+      "type": "string",
+      "description": "Short text describing purpose"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date",
+      "description": "Applicant DOB"
+    },
+    "nationality": {
+      "type": "string",
+      "description": "Applicant nationality"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "Male",
+        "Female",
+        "Other"
+      ],
+      "description": "Applicant gender"
+    },
+    "passport_issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Passport issue date"
+    },
+    "passport_expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Passport expiry date"
+    },
+    "mobile_number": {
+      "type": "string",
+      "description": "Contact mobile"
+    },
+    "email_address": {
+      "type": "string",
+      "description": "Contact email"
+    },
+    "present_address": {
+      "type": "string",
+      "description": "Current address"
+    },
+    "national_id_url": {
+      "type": "string",
+      "description": "National ID or birth certificate URL"
+    },
+    "bank_statement_url": {
+      "type": "string",
+      "description": "Bank statement URL (optional)"
+    },
+    "passport_photo_url": {
+      "type": "string",
+      "description": "Passport size photo URL"
+    },
+    "application_fee": {
+      "type": "number",
+      "default": 0,
+      "description": "Fee paid (BDT)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "under_review",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Application status"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reason if rejected"
+    },
+    "internal_notes": {
+      "type": "string",
+      "description": "Admin internal notes"
+    },
+    "applicant_message": {
+      "type": "string",
+      "description": "Message/note visible to applicant"
+    },
+    "app_ref": {
+      "type": "string",
+      "description": "Unique application reference"
+    },
+    "doc_verification": {
+      "type": "object",
+      "description": "Document verification status",
+      "properties": {
+        "passport_scan": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "verified",
+            "invalid",
+            "missing"
+          ]
+        },
+        "national_id": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "verified",
+            "invalid",
+            "missing"
+          ]
+        },
+        "bank_statement": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "verified",
+            "invalid",
+            "missing",
+            "not_required"
+          ]
+        },
+        "passport_photo": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "verified",
+            "invalid",
+            "missing"
+          ]
+        }
+      }
+    },
+    "action_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Admin action log"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

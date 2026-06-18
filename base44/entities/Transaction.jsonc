@@ -1,0 +1,103 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "deposit",
+        "withdraw",
+        "mobile_banking",
+        "bank_transfer",
+        "send",
+        "receive"
+      ]
+    },
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "success",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "tx_id": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "recipient_mobile": {
+      "type": "string"
+    },
+    "bank_name": {
+      "type": "string"
+    },
+    "account_number": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "last_digits": {
+      "type": "string",
+      "description": "Last 4 digits of transaction/account number"
+    },
+    "approval_last_4_digit": {
+      "type": "string",
+      "description": "Last 4 digits reference number provided by admin during approval"
+    },
+    "ticket_data": {
+      "type": "string",
+      "description": "JSON string of air ticket details for receipt generation"
+    },
+    "deposit_request_id": {
+      "type": "string",
+      "description": "Reference to ManualDepositRequest or auto deposit"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

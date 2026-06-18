@@ -1,0 +1,101 @@
+{
+  "name": "ManualDepositRequest",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "mobile_banking",
+        "bank"
+      ]
+    },
+    "amount_sent": {
+      "type": "number",
+      "description": "Amount sent in foreign currency"
+    },
+    "last_digits": {
+      "type": "string",
+      "description": "Last 4 digits of transaction number (mobile banking)"
+    },
+    "receipt_url": {
+      "type": "string",
+      "description": "Uploaded receipt image URL (bank)"
+    },
+    "bdt_amount": {
+      "type": "number",
+      "description": "Calculated BDT amount"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "admin_note": {
+      "type": "string"
+    },
+    "repeat_count": {
+      "type": "number",
+      "default": 1,
+      "description": "Multiplier used during approval"
+    },
+    "approved_total": {
+      "type": "number",
+      "description": "Total BDT credited (bdt_amount \u00d7 repeat_count)"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}",
+          "data.status": "pending"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

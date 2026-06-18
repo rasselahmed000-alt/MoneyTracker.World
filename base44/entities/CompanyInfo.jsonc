@@ -1,0 +1,178 @@
+{
+  "name": "CompanyInfo",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Official company name"
+    },
+    "company_description": {
+      "type": "string",
+      "description": "Company overview and mission"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Company logo URL"
+    },
+    "banner_url": {
+      "type": "string",
+      "description": "Company banner URL"
+    },
+    "gallery_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Up to 4 gallery images for About Us page"
+    },
+    "total_countries": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of countries supported"
+    },
+    "total_users": {
+      "type": "number",
+      "default": 0,
+      "description": "Total active users"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "maintenance"
+      ],
+      "default": "active"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon_url": {
+            "type": "string"
+          },
+          "processing_time": {
+            "type": "string"
+          },
+          "fee_percent": {
+            "type": "number"
+          },
+          "min_limit": {
+            "type": "number"
+          },
+          "max_limit": {
+            "type": "number"
+          },
+          "is_active": {
+            "type": "boolean",
+            "default": true
+          },
+          "is_featured": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "List of services offered"
+    },
+    "office_address": {
+      "type": "string",
+      "description": "Physical office address"
+    },
+    "office_lat": {
+      "type": "number",
+      "description": "Office latitude for map"
+    },
+    "office_lng": {
+      "type": "number",
+      "description": "Office longitude for map"
+    },
+    "trade_license": {
+      "type": "string",
+      "description": "Trade license number"
+    },
+    "registration_number": {
+      "type": "string",
+      "description": "Company registration number"
+    },
+    "license_url": {
+      "type": "string",
+      "description": "License document URL"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Official contact number"
+    },
+    "email": {
+      "type": "string",
+      "description": "Official email address"
+    },
+    "website": {
+      "type": "string",
+      "description": "Company website URL"
+    },
+    "facebook_url": {
+      "type": "string",
+      "description": "Facebook page URL"
+    },
+    "whatsapp_number": {
+      "type": "string",
+      "description": "WhatsApp channel number"
+    },
+    "security_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Security features offered"
+    },
+    "is_ssl_secured": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_encrypted": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.status": "active"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

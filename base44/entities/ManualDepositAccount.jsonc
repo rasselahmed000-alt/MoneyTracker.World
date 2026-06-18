@@ -1,0 +1,111 @@
+{
+  "name": "ManualDepositAccount",
+  "type": "object",
+  "properties": {
+    "country": {
+      "type": "string",
+      "description": "Country name e.g. Malaysia"
+    },
+    "currency": {
+      "type": "string",
+      "description": "Currency full name e.g. Ringgit"
+    },
+    "currency_code": {
+      "type": "string",
+      "description": "Currency code e.g. MYR"
+    },
+    "flag_emoji": {
+      "type": "string",
+      "description": "Flag emoji e.g. \ud83c\uddf2\ud83c\uddfe"
+    },
+    "exchange_rate": {
+      "type": "number",
+      "description": "1 foreign currency = X BDT"
+    },
+    "send_limit": {
+      "type": "number",
+      "description": "Maximum send amount in foreign currency (0 = unlimited)"
+    },
+    "receive_limit": {
+      "type": "number",
+      "description": "Maximum receive amount in BDT (0 = unlimited)"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "mobile_banking",
+        "bank"
+      ],
+      "description": "mobile_banking or bank"
+    },
+    "mobile_number": {
+      "type": "string",
+      "description": "For mobile banking"
+    },
+    "mobile_provider": {
+      "type": "string",
+      "description": "e.g. bKash, Nagad, etc."
+    },
+    "bank_name": {
+      "type": "string"
+    },
+    "account_holder": {
+      "type": "string"
+    },
+    "account_number": {
+      "type": "string"
+    },
+    "iban": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "swift_code": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.is_active": true
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

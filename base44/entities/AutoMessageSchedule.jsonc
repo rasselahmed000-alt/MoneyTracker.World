@@ -1,0 +1,106 @@
+{
+  "name": "AutoMessageSchedule",
+  "type": "object",
+  "properties": {
+    "is_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Is auto messaging currently active"
+    },
+    "time_range_minutes": {
+      "type": "number",
+      "default": 60,
+      "description": "Time range in minutes"
+    },
+    "target_message_count": {
+      "type": "number",
+      "default": 30,
+      "description": "Total messages to publish in the time range"
+    },
+    "publish_mode": {
+      "type": "string",
+      "enum": [
+        "sequential",
+        "random"
+      ],
+      "default": "random",
+      "description": "Sequential or random message selection"
+    },
+    "activity_intensity": {
+      "type": "number",
+      "default": 0.5,
+      "description": "Activity intensity 0-1"
+    },
+    "auto_delete_after_send": {
+      "type": "boolean",
+      "default": false,
+      "description": "Auto delete message from library after it is sent"
+    },
+    "last_sequential_index": {
+      "type": "number",
+      "default": 0
+    },
+    "last_message_time": {
+      "type": "string"
+    },
+    "current_batch_start": {
+      "type": "string"
+    },
+    "current_batch_count": {
+      "type": "number",
+      "default": 0
+    },
+    "total_published": {
+      "type": "number",
+      "default": 0
+    },
+    "used_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "recent_users": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "next_publish_time": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

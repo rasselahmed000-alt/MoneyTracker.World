@@ -1,0 +1,130 @@
+{
+  "name": "Agent",
+  "type": "object",
+  "properties": {
+    "agent_name": {
+      "type": "string",
+      "description": "Agent full name or company name"
+    },
+    "agent_code": {
+      "type": "string",
+      "description": "Unique agent code used in KYC"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Auto-generated agent ID"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Agent profile photo URL"
+    },
+    "mobile": {
+      "type": "string",
+      "description": "Agent mobile number"
+    },
+    "country": {
+      "type": "string",
+      "description": "Agent country"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Admin internal notes about agent"
+    },
+    "verification_instruction": {
+      "type": "string",
+      "description": "Instructions for verifying this agent"
+    },
+    "support_info": {
+      "type": "string",
+      "description": "Support verification information (office, hours, etc.)"
+    },
+    "allow_agent_verification": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_agent_details": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_agent_photo": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_agent_status": {
+      "type": "boolean",
+      "default": true
+    },
+    "allow_support_notes": {
+      "type": "boolean",
+      "default": false
+    },
+    "total_customers": {
+      "type": "number",
+      "default": 0
+    },
+    "approved_kyc": {
+      "type": "number",
+      "default": 0
+    },
+    "pending_kyc": {
+      "type": "number",
+      "default": 0
+    },
+    "audit_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "by": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Audit log of admin actions"
+    }
+  },
+  "required": [
+    "agent_name",
+    "agent_code"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

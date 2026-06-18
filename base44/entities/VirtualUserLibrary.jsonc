@@ -1,0 +1,50 @@
+{
+  "name": "VirtualUserLibrary",
+  "type": "object",
+  "properties": {
+    "username": {
+      "type": "string",
+      "description": "Virtual user display name"
+    },
+    "is_used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this username has been used for an auto message"
+    },
+    "used_date": {
+      "type": "string",
+      "description": "Date when this username was used"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

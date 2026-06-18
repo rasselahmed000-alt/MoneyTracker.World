@@ -1,0 +1,87 @@
+{
+  "name": "GroupMessage",
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string",
+      "description": "Message text"
+    },
+    "username": {
+      "type": "string",
+      "description": "Display name (random for system, email for users)"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email (null for system messages)"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "system"
+      ],
+      "default": "user",
+      "description": "user = customer, system = automated bot"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Only user messages need approval"
+    },
+    "is_pinned": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_user_banned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Block this user from posting"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}",
+      "user_condition": {
+        "role": "user"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.status": "approved"
+        },
+        {
+          "$and": [
+            {
+              "data.user_email": "{{user.email}}"
+            },
+            {
+              "data.status": "pending"
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
