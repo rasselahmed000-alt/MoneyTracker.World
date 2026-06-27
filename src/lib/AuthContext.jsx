@@ -1,99 +1,124 @@
 import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
-import { base44 } from '@/api/base44Client';
+import { auth, subscribeAuthStateChanged, getUserDoc, mapFirebaseUserToAppUser, signOutUser } from '@/api/firebaseClient';
 
 const AuthContext = createContext(null);
-
-let _authPromise = null;
 let _resolvedUser = undefined;
 
-function getAuthOnce() {
-  if (!_authPromise) {
-    _authPromise = base44.auth.me()
-      .then(u  => { _resolvedUser = u || null; return _resolvedUser; })
-      .catch(() => { _resolvedUser = null; return null; });
-  }
-  return _authPromise;
+async function getAppUser(authUser) {
+  if (!authUser) return null;
+  const userDoc = await getUserDoc(authUser.uid);
+  return mapFirebaseUserToAppUser(authUser, userDoc);
 }
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]     = useState(() => _resolvedUser !== undefined ? _resolvedUser : null);
+  const [user, setUser] = useState(() => (_resolvedUser !== undefined ? _resolvedUser : null));
   const [status, setStatus] = useState(() =>
-    _resolvedUser !== undefined
-      ? (_resolvedUser ? 'authenticated' : 'unauthenticated')
-      : 'loading'
+    _resolvedUser !== undefined ? (_resolvedUser ? 'authenticated' : 'unauthenticated') : 'loading'
   );
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => _resolvedUser?.role === 'admin');
   const mountedRef = useRef(true);
 
   useEffect(() => {
     mountedRef.current = true;
+
     if (_resolvedUser !== undefined) {
-      // Check role from cached user
-      if (_resolvedUser?.role === 'admin') setIsAdmin(true);
+      setUser(_resolvedUser);
+      setStatus(_resolvedUser ? 'authenticated' : 'unauthenticated');
+      setIsAdmin(_resolvedUser?.role === 'admin');
       return;
     }
 
-    getAuthOnce().then(u => {
+    const unsubscribe = subscribeAuthStateChanged(async (authUser) => {
       if (!mountedRef.current) return;
-      if (u) {
-        setUser(u);
-        setStatus('authenticated');
-        setIsAdmin(u.role === 'admin');
-      }
-      else {
+      try {
+        const appUser = await getAppUser(authUser);
+        _resolvedUser = appUser;
+        if (!mountedRef.current) return;
+        if (appUser) {
+          setUser(appUser);
+          setStatus('authenticated');
+          setIsAdmin(appUser.role === 'admin');
+        } else {
+          setUser(null);
+          setStatus('unauthenticated');
+          setIsAdmin(false);
+        }
+      } catch {
+        if (!mountedRef.current) return;
+        _resolvedUser = null;
         setUser(null);
         setStatus('unauthenticated');
         setIsAdmin(false);
       }
     });
 
-    return () => { mountedRef.current = false; };
+    return () => {
+      mountedRef.current = false;
+      unsubscribe();
+    };
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
-      _authPromise = null;
-      _resolvedUser = undefined;
-      const u = await base44.auth.me();
-      if (!mountedRef.current) return;
-      if (u) {
-        _authPromise = Promise.resolve(u);
-        _resolvedUser = u;
-        setUser({ ...u });
-        setIsAdmin(u.role === 'admin');
+      const authUser = auth.currentUser;
+      if (!authUser) {
+        _resolvedUser = null;
+        if (!mountedRef.current) return null;
+        setUser(null);
+        setStatus('unauthenticated');
+        setIsAdmin(false);
+        return null;
       }
-    } catch {}
+      const appUser = await getAppUser(authUser);
+      _resolvedUser = appUser;
+      if (!mountedRef.current) return appUser;
+      setUser(appUser);
+      setStatus(appUser ? 'authenticated' : 'unauthenticated');
+      setIsAdmin(appUser?.role === 'admin');
+      return appUser;
+    } catch {
+      _resolvedUser = null;
+      if (!mountedRef.current) return null;
+      setUser(null);
+      setStatus('unauthenticated');
+      setIsAdmin(false);
+      return null;
+    }
   }, []);
 
-  const logout = useCallback(() => {
-    _authPromise = null;
-    _resolvedUser = undefined;
+  const logout = useCallback(async () => {
+    try {
+      await signOutUser();
+    } catch (err) {
+      console.warn('Sign out failed', err);
+    }
+    _resolvedUser = null;
     setUser(null);
     setStatus('unauthenticated');
     setIsAdmin(false);
-    base44.auth.logout();
   }, []);
 
   const checkAppState = useCallback(async () => {
     if (!mountedRef.current) return;
     setStatus('loading');
-    _authPromise = null;
     _resolvedUser = undefined;
     try {
-      const u = await getAuthOnce();
+      const authUser = auth.currentUser;
+      const appUser = await getAppUser(authUser);
+      _resolvedUser = appUser;
       if (!mountedRef.current) return;
-      if (u) {
-        setUser(u);
+      if (appUser) {
+        setUser(appUser);
         setStatus('authenticated');
-        setIsAdmin(u.role === 'admin');
-      }
-      else {
+        setIsAdmin(appUser.role === 'admin');
+      } else {
         setUser(null);
         setStatus('unauthenticated');
         setIsAdmin(false);
       }
     } catch {
       if (!mountedRef.current) return;
+      _resolvedUser = null;
       setUser(null);
       setStatus('unauthenticated');
       setIsAdmin(false);
@@ -105,10 +130,10 @@ export const AuthProvider = ({ children }) => {
       user,
       status,
       isAdmin,
-      isAuthenticated:         status === 'authenticated',
-      isLoadingAuth:           status === 'loading',
+      isAuthenticated: status === 'authenticated',
+      isLoadingAuth: status === 'loading',
       isLoadingPublicSettings: status === 'loading',
-      authChecked:             status !== 'loading',
+      authChecked: status !== 'loading',
       refreshUser,
       logout,
       checkAppState,
