@@ -98,6 +98,13 @@ export function mapFirebaseUserToAppUser(authUser, userDoc = null) {
   };
 }
 
+export async function getCurrentUser() {
+  const authUser = auth.currentUser;
+  if (!authUser) return null;
+  const userDoc = await getUserDoc(authUser.uid);
+  return mapFirebaseUserToAppUser(authUser, userDoc);
+}
+
 export async function ensureUserDoc(authUser) {
   if (!authUser) return null;
   const userDoc = await getUserDoc(authUser.uid);
@@ -138,4 +145,16 @@ export async function updateFirebaseUserProfile(updates) {
 
 export async function signOutUser() {
   return firebaseSignOut(auth);
+}
+
+export async function createTransaction(data) {
+  const payload = {
+    created_at: new Date().toISOString(),
+    created_date: new Date().toISOString(),
+    status: data.status || 'pending',
+    ...data,
+  };
+  const docRef = doc(collection(db, 'transactions'));
+  await setDoc(docRef, payload);
+  return { id: docRef.id, ...payload };
 }
