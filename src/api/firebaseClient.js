@@ -46,7 +46,16 @@ const getFirebaseConfig = () => {
     };
   }
 
-  return null;
+  // Fallback to user-provided default config
+  return {
+    apiKey: "AIzaSyBdY4RKoJDNVL5yuw302jrmxrqF_6NdHb0",
+    authDomain: "money-tracker-ef2f2.firebaseapp.com",
+    projectId: "money-tracker-ef2f2",
+    storageBucket: "money-tracker-ef2f2.firebasestorage.app",
+    messagingSenderId: "185931539517",
+    appId: "1:185931539517:web:2345fa75914198628cf654",
+    measurementId: "G-7K19RNXQPX"
+  };
 };
 
 const activeConfig = getFirebaseConfig();
