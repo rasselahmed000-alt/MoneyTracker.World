@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, AlertCircle, Plus } from 'lucide-react';
 import UniversalHeader from '@/components/cellfin/UniversalHeader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { verifyUserPin, getCurrentUser, createTransaction } from '@/api/firebaseClient';
 import { useAuth } from '@/lib/AuthContext';
 
 // Official brand config — matches real app branding
@@ -82,22 +82,25 @@ export default function MobileBankingTransfer() {
     setLoading(true);
     setPinError('');
     try {
-      const pinRes = await base44.functions.invoke('verifyPin', { pin });
-      if (!pinRes.data?.success) {
-        if (pinRes.data?.no_pin) {
-          setPinError('PIN সেট করা নেই। Profile → Set PIN করুন।');
-        } else {
-          setPinError(pinRes.data?.error || 'Wrong PIN');
-        }
+      // Get current user
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        setError('User not found');
         setLoading(false);
         return;
       }
 
-      // Fetch fresh balance for accurate check
-      const me = await base44.auth.me();
-      setLiveUser(me);
-      const bal = me?.balance ?? 0;
-      const minBal = me?.min_balance ?? 0;
+      // Verify PIN
+      const isPinValid = await verifyUserPin(currentUser.email, pin);
+      if (!isPinValid) {
+        setPinError('Wrong PIN');
+        setLoading(false);
+        return;
+      }
+
+      setLiveUser(currentUser);
+      const bal = currentUser?.balance ?? 0;
+      const minBal = currentUser?.min_balance ?? 0;
 
       if (bal < Number(amount)) {
         setInsufficientBalance(true);
@@ -113,23 +116,24 @@ export default function MobileBankingTransfer() {
         return;
       }
 
-      const id = 'TX' + Date.now();
-      await base44.entities.Transaction.create({
-        user_id: me.id,
-        user_email: me.email,
+      const txId = 'TX' + Date.now();
+      await createTransaction({
+        user_id: currentUser.uid,
+        user_email: currentUser.email,
         type: 'mobile_banking',
         amount: Number(amount),
         currency: 'BDT',
         status: 'pending',
-        tx_id: id,
+        tx_id: txId,
         provider: provider.toUpperCase(),
         recipient_mobile: number,
         description: `${config.name} - ${type}`,
       });
 
-      setTxId(id);
+      setTxId(txId);
       setSuccess(true);
     } catch (err) {
+      console.error(err);
       setError(err?.message || 'Transfer failed');
     }
     setLoading(false);

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeftRight, Search, Plane, CheckCircle2, AlertCircle, Plus, Tag, Clock, Users } from 'lucide-react';
 import UniversalHeader from '@/components/cellfin/UniversalHeader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { verifyUserPin, getCurrentUser, createTransaction, updateUserDoc } from '@/api/firebaseClient';
 
 const AIRPORTS = [
   { code: 'DAC', name: 'Dhaka', country: 'Bangladesh', flag: '🇧🇩', full: 'Hazrat Shahjalal International' },
@@ -254,7 +254,7 @@ export default function AirTicket() {
   const [insufficientBalance, setInsufficientBalance] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(u => setUserBalance(u?.balance ?? 0)).catch(() => {});
+    getCurrentUser().then(u => setUserBalance(u?.balance ?? 0)).catch(() => {});
   }, []);
 
   const handleSearch = async () => {
@@ -286,13 +286,13 @@ export default function AirTicket() {
     if (pin.length < 4) return;
     setPaying(true);
     // Verify PIN first
-    const pinRes = await base44.functions.invoke('verifyPin', { pin });
-    if (!pinRes.data?.success) {
-      setPinError(pinRes.data?.error || 'ভুল PIN! আবার চেষ্টা করুন।');
+    const isPinValid = await verifyUserPin(me.email, pin);
+    if (!isPinValid) {
+      setPinError('ভুল PIN! আবার চেষ্টা করুন।');
       setPaying(false);
       return;
     }
-    const me = await base44.auth.me();
+    const me = await getCurrentUser();
     const bal = me?.balance ?? 0;
     const minBal = me?.min_balance ?? 0;
     if (bal < totalPrice) {
@@ -309,7 +309,7 @@ export default function AirTicket() {
     }
     const ref = 'BK' + Date.now().toString().slice(-8);
     setBookingRef(ref);
-    await base44.auth.updateMe({ balance: bal - totalPrice });
+    await updateUserDoc(me.uid, { balance: bal - totalPrice });
     const ticketData = {
       bookingRef: ref,
       fromCode: from.code, fromName: from.name,
@@ -323,7 +323,7 @@ export default function AirTicket() {
       totalPrice, originalPrice: totalOriginal, savings,
       pricePerPax: selected.price,
     };
-    await base44.entities.Transaction.create({
+    await createTransaction({
       user_id: me.id, user_email: me.email, type: 'send',
       amount: totalPrice, currency: me.currency || 'BDT',
       status: 'success', tx_id: ref,
@@ -331,7 +331,7 @@ export default function AirTicket() {
       ticket_data: JSON.stringify(ticketData),
     });
     const emailHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:20px}.ticket{max-width:560px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.12)}.hdr{background:linear-gradient(135deg,#0B3D2E,#1a6b4e);color:#fff;padding:28px;text-align:center}.logo{font-size:26px;font-weight:900;color:#D4A843;letter-spacing:2px}.sub{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase;margin-top:2px}.badge{display:inline-block;background:#22c55e;color:#fff;font-size:11px;font-weight:700;padding:4px 16px;border-radius:20px;margin-top:10px}.route{background:linear-gradient(135deg,#0B3D2E,#1a6b4e);padding:0 28px 24px}.rbox{background:rgba(255,255,255,.1);border-radius:14px;padding:18px;display:flex;align-items:center;justify-content:space-between}.code{font-size:34px;font-weight:900;color:#fff}.cname{font-size:10px;color:rgba(255,255,255,.5)}.mid{flex:1;text-align:center;color:rgba(255,255,255,.5);font-size:20px;padding:0 10px}.times{display:flex;gap:8px;justify-content:center;padding:0 28px 24px;background:linear-gradient(135deg,#0B3D2E,#1a6b4e)}.tb{background:rgba(255,255,255,.15);border-radius:10px;padding:8px 16px;text-align:center}.tl{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase}.tv{font-size:18px;font-weight:900;color:#fff}.body{padding:24px 28px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}.item label{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;font-weight:700;display:block;margin-bottom:2px}.item span{font-size:13px;color:#1e293b;font-weight:700}.ref{background:#f8fafc;border:2px dashed #e2e8f0;border-radius:14px;padding:14px;text-align:center;margin-bottom:18px}.rl{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;font-weight:700}.rc{font-size:26px;font-weight:900;color:#0B3D2E;letter-spacing:4px;margin:4px 0}.pr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9}.pl{font-size:12px;color:#64748b}.pv{font-size:13px;font-weight:700;color:#1e293b}.total-row{display:flex;justify-content:space-between;padding:12px 0;border-top:2px solid #e2e8f0;margin-top:4px}.total-label{font-size:14px;font-weight:700;color:#1e293b}.total-val{font-size:18px;font-weight:900;color:#0B3D2E}.footer{background:#f8fafc;padding:16px 28px;text-align:center;font-size:11px;color:#94a3b8}</style></head><body><div class="ticket"><div class="hdr"><div class="logo">CELLFIN</div><div class="sub">E-Ticket / Boarding Pass</div><div class="badge">✓ CONFIRMED</div></div><div class="route"><div class="rbox"><div><div class="code">${from.code}</div><div class="cname">${from.name}</div></div><div class="mid">✈</div><div style="text-align:right"><div class="code">${to.code}</div><div class="cname">${to.name}</div></div></div></div><div class="times"><div class="tb"><div class="tl">Departs</div><div class="tv">${selected.departure}</div></div><div style="display:flex;align-items:center;color:rgba(255,255,255,.3);font-size:16px;background:linear-gradient(135deg,#0B3D2E,#1a6b4e);padding:0 4px">→</div><div class="tb"><div class="tl">Arrives</div><div class="tv">${selected.arrival}</div></div></div><div class="body"><div class="grid"><div class="item"><label>Airline</label><span>${selected.airline.name}</span></div><div class="item"><label>Flight No.</label><span>${selected.flightNo}</span></div><div class="item"><label>Date</label><span>${date}</span></div><div class="item"><label>Cabin</label><span>${cabin.toUpperCase()}</span></div><div class="item"><label>Passengers</label><span>${adults} Adult${children > 0 ? `, ${children} Child` : ''}</span></div><div class="item"><label>Baggage</label><span>${selected.baggage}</span></div><div class="item"><label>Passenger</label><span>${me.full_name || 'Passenger'}</span></div><div class="item"><label>Duration</label><span>${selected.duration}</span></div></div><div class="ref"><div class="rl">Booking Reference</div><div class="rc">${ref}</div><div style="font-size:10px;color:#94a3b8">Present at check-in</div></div><div class="pr"><span class="pl">Original Price</span><span class="pv" style="text-decoration:line-through;color:#94a3b8">৳${totalOriginal.toLocaleString()}</span></div><div class="pr"><span class="pl">Cellfin Discount (20%)</span><span class="pv" style="color:#22c55e">-৳${savings.toLocaleString()}</span></div><div class="total-row"><span class="total-label">Total Paid</span><span class="total-val">৳${totalPrice.toLocaleString()}</span></div></div><div class="footer"><strong style="color:#0B3D2E">Cellfin Remittance</strong> — Your trusted digital partner<br>Issued: ${new Date().toLocaleString()}</div></div></body></html>`;
-    await base44.integrations.Core.SendEmail({
+    // TODO: Implement email notification via Firebase Cloud Function
       to: me.email,
       subject: `✈️ Cellfin Air Ticket Confirmed — ${ref}`,
       body: emailHtml,
