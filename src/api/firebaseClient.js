@@ -139,3 +139,38 @@ export async function updateFirebaseUserProfile(updates) {
 export async function signOutUser() {
   return firebaseSignOut(auth);
 }
+
+export async function getCurrentUser() {
+  const authUser = auth.currentUser;
+  if (!authUser) return null;
+  const userDoc = await getUserDoc(authUser.uid);
+  return mapFirebaseUserToAppUser(authUser, userDoc);
+}
+
+export async function createTransaction(data) {
+  const newDocRef = doc(collection(db, 'transactions'));
+  const payload = {
+    id: newDocRef.id,
+    created_at: new Date().toISOString(),
+    ...data,
+  };
+  await setDoc(newDocRef, payload);
+  return payload;
+}
+
+export async function getUserTransactions(uid, limitVal = 50) {
+  if (!uid) return [];
+  const q = query(
+    collection(db, 'transactions'),
+    where('user_id', '==', uid),
+    limit(limitVal)
+  );
+  const snapshot = await getDocs(q);
+  const txs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Sort in memory to avoid Firestore index requirement issues
+  return txs.sort((a, b) => {
+    const dateA = a.created_at || '';
+    const dateB = b.created_at || '';
+    return dateB.localeCompare(dateA);
+  });
+}
