@@ -20,15 +20,70 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+// Helper to read config from environment or local storage fallback
+const getFirebaseConfig = () => {
+  try {
+    const saved = localStorage.getItem('custom_firebase_config');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.apiKey && parsed.apiKey.startsWith('AIzaSy')) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load custom Firebase config from localStorage:', e);
+  }
+
+  const envKey = import.meta.env.VITE_FIREBASE_API_KEY;
+  if (envKey && envKey.startsWith('AIzaSy')) {
+    return {
+      apiKey: envKey,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+      appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+    };
+  }
+
+  return null;
 };
 
+const activeConfig = getFirebaseConfig();
+
+// Dummy config to prevent initialization crashes when keys are missing
+const dummyConfig = {
+  apiKey: "AIzaSy_dummy_api_key_for_setup_interface_only",
+  authDomain: "dummy-project.firebaseapp.com",
+  projectId: "dummy-project",
+  storageBucket: "dummy-project.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:1234567890",
+};
+
+export const isFirebaseConfigured = () => !!activeConfig;
+
+export const saveFirebaseConfig = (config) => {
+  try {
+    localStorage.setItem('custom_firebase_config', JSON.stringify(config));
+    return true;
+  } catch (e) {
+    console.error('Failed to save Firebase config:', e);
+    return false;
+  }
+};
+
+export const clearFirebaseConfig = () => {
+  try {
+    localStorage.removeItem('custom_firebase_config');
+    return true;
+  } catch (e) {
+    console.error('Failed to clear Firebase config:', e);
+    return false;
+  }
+};
+
+export const firebaseConfig = activeConfig || dummyConfig;
 export const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);

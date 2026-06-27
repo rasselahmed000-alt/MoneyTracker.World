@@ -5,6 +5,7 @@ import { queryClientOptimized } from '@/lib/query-optimized'
 import { HashRouter as Router, Route, Routes, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { isFirebaseConfigured, saveFirebaseConfig } from '@/api/firebaseClient';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/cellfin/ErrorBoundary';
 import DeepLinkHandler from '@/components/DeepLinkHandler';
@@ -375,7 +376,165 @@ const RootRouter = memo(function RootRouter() {
   );
 });
 
+function FirebaseSetupScreen() {
+  const [config, setConfig] = useState({
+    apiKey: '',
+    authDomain: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: '',
+  });
+  const [error, setError] = useState('');
+
+  const handleChange = (e) => {
+    setConfig({
+      ...config,
+      [e.target.name]: e.target.value.trim()
+    });
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (!config.apiKey || !config.projectId) {
+      setError('API Key and Project ID are required.');
+      return;
+    }
+    if (!config.apiKey.startsWith('AIzaSy')) {
+      setError('Invalid Firebase API Key. It should start with "AIzaSy".');
+      return;
+    }
+    
+    const success = saveFirebaseConfig(config);
+    if (success) {
+      window.location.reload();
+    } else {
+      setError('Failed to save configuration. Please try again.');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-[#07241b] text-slate-100 p-6 overflow-y-auto z-[999999]">
+      <div className="w-full max-w-md bg-[#0b3d2e] rounded-2xl p-6 border border-emerald-800 shadow-2xl my-auto">
+        <div className="text-center mb-6">
+          <div className="inline-flex p-3 rounded-full bg-emerald-950 text-emerald-400 mb-3 border border-emerald-800">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold tracking-tight text-white">Firebase Connection Setup</h2>
+          <p className="text-xs text-slate-300 mt-2">
+            দয়া করে আপনার ফায়ারবেস ক্রেডেনশিয়াল প্রদান করুন। এর মাধ্যমে আপনার অ্যান্ড্রয়েড অ্যাপটি ডেটাবেসের সাথে সংযুক্ত হবে।
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-950/80 border border-red-800 text-red-200 text-xs rounded-lg font-medium text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSave} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">API Key *</label>
+            <input
+              type="text"
+              name="apiKey"
+              value={config.apiKey}
+              onChange={handleChange}
+              placeholder="AIzaSy..."
+              className="w-full bg-[#051812] border border-emerald-900 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 placeholder-emerald-800/80 font-mono text-xs"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Project ID *</label>
+            <input
+              type="text"
+              name="projectId"
+              value={config.projectId}
+              onChange={handleChange}
+              placeholder="money-tracker-ef2f2"
+              className="w-full bg-[#051812] border border-emerald-900 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 placeholder-emerald-800/80 font-mono text-xs"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Auth Domain</label>
+              <input
+                type="text"
+                name="authDomain"
+                value={config.authDomain}
+                onChange={handleChange}
+                placeholder="project.firebaseapp.com"
+                className="w-full bg-[#051812] border border-emerald-900 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 placeholder-emerald-800/80 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Storage Bucket</label>
+              <input
+                type="text"
+                name="storageBucket"
+                value={config.storageBucket}
+                onChange={handleChange}
+                placeholder="project.appspot.com"
+                className="w-full bg-[#051812] border border-emerald-900 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 placeholder-emerald-800/80 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Messaging Sender ID</label>
+              <input
+                type="text"
+                name="messagingSenderId"
+                value={config.messagingSenderId}
+                onChange={handleChange}
+                placeholder="1234567890"
+                className="w-full bg-[#051812] border border-emerald-900 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 placeholder-emerald-800/80 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">App ID</label>
+              <input
+                type="text"
+                name="appId"
+                value={config.appId}
+                onChange={handleChange}
+                placeholder="1:1234:web:abcd"
+                className="w-full bg-[#051812] border border-emerald-900 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 placeholder-emerald-800/80 font-mono"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 px-4 rounded-lg text-sm transition-colors mt-6 shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
+          >
+            Save and Connect / সংরক্ষণ করুন
+          </button>
+        </form>
+
+        <div className="mt-6 pt-4 border-t border-emerald-900 text-[10px] text-slate-400 space-y-1">
+          <p className="font-semibold text-emerald-500 text-[11px]">How to get these values?</p>
+          <p>1. Go to your <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" className="text-emerald-400 underline font-medium">Firebase Console</a></p>
+          <p>2. Open Project Settings → General → Your apps</p>
+          <p>3. Select your Web app configuration block and copy the keys.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  if (!isFirebaseConfigured()) {
+    return <FirebaseSetupScreen />;
+  }
+
   return (
     <ErrorBoundary>
       <PreloadOptimization />
