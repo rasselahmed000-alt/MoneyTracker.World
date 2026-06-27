@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#0b3d2e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -12,9 +12,9 @@
     <meta name="mobile-web-app-capable" content="yes" />
     
     <!-- Deep Linking Support for iOS (Universal Links) -->
-    <link rel="apple-app-site-association" href="/.well-known/apple-app-site-association" />
+    <link rel="apple-app-site-association" href="./.well-known/apple-app-site-association" />
     <!-- Deep Linking Support for Android (App Links) -->
-    <link rel="assetlinks" href="/.well-known/assetlinks.json" />
+    <link rel="assetlinks" href="./.well-known/assetlinks.json" />
     
     <!-- Deep Link Meta Tags -->
     <meta name="apple-itunes-app" content="app-id=YOUR_APP_ID, affiliate-data=app=moneytracker" />
@@ -35,9 +35,51 @@
         });
       }
     </script>
+    <script>
+      window.addEventListener('error', function(e) {
+        var errDiv = document.createElement('div');
+        errDiv.style.position = 'fixed';
+        errDiv.style.top = '0';
+        errDiv.style.left = '0';
+        errDiv.style.width = '100%';
+        errDiv.style.height = '100%';
+        errDiv.style.backgroundColor = '#7f1d1d';
+        errDiv.style.color = '#fecaca';
+        errDiv.style.padding = '20px';
+        errDiv.style.zIndex = '999999';
+        errDiv.style.fontFamily = 'monospace';
+        errDiv.style.overflow = 'auto';
+        errDiv.style.boxSizing = 'border-box';
+        errDiv.innerHTML = '<h1>💥 Runtime Error Catched</h1>' +
+          '<p><strong>Message:</strong> ' + e.message + '</p>' +
+          '<p><strong>Filename:</strong> ' + e.filename + '</p>' +
+          '<p><strong>Line:</strong> ' + e.lineno + ':' + e.colno + '</p>' +
+          '<p><strong>Stack:</strong></p><pre>' + (e.error && e.error.stack ? e.error.stack : 'N/A') + '</pre>';
+        document.body.appendChild(errDiv);
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        var errDiv = document.createElement('div');
+        errDiv.style.position = 'fixed';
+        errDiv.style.top = '0';
+        errDiv.style.left = '0';
+        errDiv.style.width = '100%';
+        errDiv.style.height = '100%';
+        errDiv.style.backgroundColor = '#7f1d1d';
+        errDiv.style.color = '#fecaca';
+        errDiv.style.padding = '20px';
+        errDiv.style.zIndex = '999999';
+        errDiv.style.fontFamily = 'monospace';
+        errDiv.style.overflow = 'auto';
+        errDiv.style.boxSizing = 'border-box';
+        errDiv.innerHTML = '<h1>💥 Unhandled Promise Rejection</h1>' +
+          '<p><strong>Reason:</strong> ' + (e.reason && e.reason.message ? e.reason.message : e.reason) + '</p>' +
+          '<p><strong>Stack:</strong></p><pre>' + (e.reason && e.reason.stack ? e.reason.stack : 'N/A') + '</pre>';
+        document.body.appendChild(errDiv);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>
