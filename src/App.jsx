@@ -12,6 +12,7 @@ import DeepLinkHandler from '@/components/DeepLinkHandler';
 
 // Customer Pages (eagerly loaded — fast first paint)
 import Home from './pages/Home.jsx';
+import Welcome from './pages/Welcome.jsx';
 import GeoRestriction from './components/cellfin/GeoRestriction';
 import AppLockScreen, { recordActivity, markSessionUnlocked, isSessionLocked, checkBackgroundLock } from './components/cellfin/AppLockScreen';
 import PreloadOptimization from './components/cellfin/PreloadOptimization';
@@ -363,6 +364,7 @@ const RootRouter = memo(function RootRouter() {
       <QueryClientProvider client={queryClientOptimized}>
         <DeepLinkHandler />
         <Routes>
+          <Route path="/welcome" element={<Welcome />} />
           <Route path="/admin/*" element={<AdminSectionWithPIN />} />
           <Route path="/*" element={
             <GeoRestriction>
