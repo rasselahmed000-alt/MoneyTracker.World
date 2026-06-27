@@ -13,6 +13,7 @@ function urlBase64ToUint8Array(base64String) {
 export function usePushNotifications(user) {
   useEffect(() => {
     if (!user?.email) return;
+    if (window.location.protocol === 'file:') return; // Skip in Android WebView to prevent crashes
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     if (!VAPID_PUBLIC_KEY) return;
     // Skip push notification setup in development to avoid SW caching stale JS
