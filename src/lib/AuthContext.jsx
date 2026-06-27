@@ -25,11 +25,13 @@ export const AuthProvider = ({ children }) => {
       setUser(_resolvedUser);
       setStatus(_resolvedUser ? 'authenticated' : 'unauthenticated');
       setIsAdmin(_resolvedUser?.role === 'admin');
-      return;
     }
 
     const unsubscribe = subscribeAuthStateChanged(async (authUser) => {
       if (!mountedRef.current) return;
+      if (authUser) {
+        setStatus('loading');
+      }
       try {
         const appUser = await getAppUser(authUser);
         _resolvedUser = appUser;
@@ -43,7 +45,8 @@ export const AuthProvider = ({ children }) => {
           setStatus('unauthenticated');
           setIsAdmin(false);
         }
-      } catch {
+      } catch (err) {
+        console.error('Failed to resolve app user:', err);
         if (!mountedRef.current) return;
         _resolvedUser = null;
         setUser(null);
