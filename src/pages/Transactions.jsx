@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { getUserTransactions, getCurrentUser } from '@/api/firebaseClient';
 import { Search, Filter } from 'lucide-react';
 import AdminShell from '../components/AdminShell';
 
@@ -10,7 +10,7 @@ export default function Transactions() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Transaction.list('-created_date', 500)
+    getUserTransactions(currentUser?.uid, 500)
       .then(setTxs).finally(() => setLoading(false));
   }, []);
 

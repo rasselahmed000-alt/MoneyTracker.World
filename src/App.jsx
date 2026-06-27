@@ -2,13 +2,12 @@ import { useState, useEffect, useRef, lazy, Suspense, memo } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientOptimized } from '@/lib/query-optimized'
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/cellfin/ErrorBoundary';
 import DeepLinkHandler from '@/components/DeepLinkHandler';
-import { base44 } from '@/api/base44Client';
 
 // Customer Pages (eagerly loaded — fast first paint)
 import Home from './pages/Home.jsx';
@@ -71,12 +70,13 @@ const AdminHomeConfig    = lazy(() => import('./pages/admin/AdminHomeConfig.jsx'
 // LOGIN REDIRECT — fires once, no loop
 // ─────────────────────────────────────────────
 function LoginRedirect() {
+  const navigate = useNavigate();
   const redirectedRef = useRef(false);
   useEffect(() => {
     if (redirectedRef.current) return;
     redirectedRef.current = true;
-    base44.auth.redirectToLogin(window.location.origin + '/');
-  }, []);
+    navigate('/welcome', { replace: true });
+  }, [navigate]);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center gap-5"
@@ -103,6 +103,7 @@ function LoginRedirect() {
 // ADMIN PIN VERIFICATION — before admin routes
 // ─────────────────────────────────────────────
 function AdminSectionWithPIN() {
+  const navigate = useNavigate();
   const { user, status, isAdmin } = useAuth();
   const [pinVerified, setPinVerified] = useState(false);
   const redirectedRef = useRef(false);
@@ -112,9 +113,9 @@ function AdminSectionWithPIN() {
   useEffect(() => {
     if (status === 'unauthenticated' && !redirectedRef.current) {
       redirectedRef.current = true;
-      base44.auth.redirectToLogin(window.location.origin + '/admin');
+      navigate('/welcome', { replace: true });
     }
-  }, [status]);
+  }, [status, navigate]);
 
   if (status === 'loading') return <PageSpinner />;
   if (status === 'unauthenticated') return <PageSpinner />;
