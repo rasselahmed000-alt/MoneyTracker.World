@@ -25,14 +25,18 @@
     
     <title>Money Tracker</title>
     <script>
-      if ('serviceWorker' in navigator) {
-        // Force unregister stale SW on every load, then re-register fresh
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          registrations.forEach(function(reg) { reg.unregister(); });
-        });
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js').catch(function() {});
-        });
+      if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+        try {
+          // Force unregister stale SW on every load, then re-register fresh
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            registrations.forEach(function(reg) { reg.unregister(); });
+          }).catch(function() {});
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('./sw.js').catch(function() {});
+          });
+        } catch (e) {
+          console.warn('Service Worker registration skipped:', e);
+        }
       }
     </script>
     <script>
